@@ -1,11 +1,10 @@
-# QUESTION: Can we use external packages? (i presume we can since they also used some lol)
-
-from nltk import FreqDist
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import loglog
+import numpy as np
 
 def analysis(name, data):
 	
+		
 	""" 
 	 Plot Zipfian distribution of words + true Zipfian distribution. Compute MSE.
 
@@ -13,16 +12,21 @@ def analysis(name, data):
   	:param data: list of words
   
   	"""
+
+    counts = [(word, data.count(word) / len(data)) for word in set(data)] 
+    sorted_freq = sorted(counts, key = lambda x: x[1], reverse=True)
+    rank = range(1,len(sorted_freq)+1)
+    freq_list = [tup[1] for tup in sorted_freq]
+    ideal = [sorted_freq[0][1]/r for r in rank]
 	
-# 	  NOTE: just Zipfian dist, needs "true Zipfian dist" + MSE
+    mse = ((np.array(ideal) - np.array(freq_list))**2).mean()
 
-	freq = FreqDist(data)                # freq - frequency distribution
-	sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)   # sorted_freq - frequency distribution sorted by values in descending order
-	freq_values = [i[1] for i in sorted_freq]
-	x = [i for i in range(1, (len(freq_values) + 1))]   # x - sequence of numbers from 1 to the # of tokens  
-	plt.loglog(x, freq_values, "bo")
-	plt.title("Log plot - {}".format(name))
-	plt.show()
-
-  
-#   print("TODO", name)
+    plt.loglog(rank, freq_list, "bo")
+    plt.loglog(rank, ideal)
+    plt.title("Log plot - {}".format(name))
+    plt.xlabel("Rank")
+    plt.ylabel("Frequency")
+    plt.show()
+    
+    
+    return mse
