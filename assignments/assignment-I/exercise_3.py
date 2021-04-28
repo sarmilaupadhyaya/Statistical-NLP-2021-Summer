@@ -29,5 +29,4 @@ def analysis(name, data):
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
     plt.show()
-	
 	print(f"MSE, {name} = {mse}")
