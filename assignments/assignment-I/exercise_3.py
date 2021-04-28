@@ -17,9 +17,10 @@ def analysis(name, data):
     sorted_freq = sorted(counts, key = lambda x: x[1], reverse=True)
     rank = range(1,len(sorted_freq)+1)
     freq_list = [tup[1] for tup in sorted_freq]
-    ideal = [sorted_freq[0][1]/r for r in rank]
 	
-    mse = ((np.array(ideal) - np.array(freq_list))**2).mean()
+    ideal = [sorted_freq[0][1]/r for r in rank] # True Zipfian distribution
+	
+    mse = ((np.array(ideal) - np.array(freq_list))**2).mean() # MSE
 
 
     plt.loglog(rank, freq_list, "bo")
