@@ -1,5 +1,7 @@
+import math
 import numpy as np
 from numpy.random import Generator, PCG64
+import matplotlib.pyplot as plt
 
 G = Generator(PCG64())
 
@@ -23,4 +25,10 @@ def plot_stick_lengths(stick_lengths:np.array,
   Plots -log2(sticks)
   :param sticks: list of stick lenghts
   """
-  pass
+  sticks = [-B * math.log2(stick_length) for stick_length in stick_lengths]
+  fig = plt.figure()
+  ax = fig.subplots()
+  ax.loglog(sticks)
+  plt.xlabel("Rank")
+  plt.ylabel("Stick Length (log2)")
+  plt.show()
