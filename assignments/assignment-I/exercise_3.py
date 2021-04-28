@@ -21,12 +21,12 @@ def analysis(name, data):
 	
     mse = ((np.array(ideal) - np.array(freq_list))**2).mean()
 
+
     plt.loglog(rank, freq_list, "bo")
     plt.loglog(rank, ideal)
     plt.title("Log plot - {}".format(name))
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
     plt.show()
-    
-    
-    return mse
+	
+	print(f"MSE, {name} = {mse}")
