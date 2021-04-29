@@ -25,10 +25,15 @@ def plot_stick_lengths(stick_lengths:np.array,
   Plots -log2(sticks)
   :param sticks: list of stick lenghts
   """
-  sticks = [-B * math.log2(stick_length) for stick_length in stick_lengths]
-  fig = plt.figure()
-  ax = fig.subplots()
-  ax.loglog(sticks)
+  
+  stick_lengths = [stick_length**B for stick_length in stick_lengths]
+  ideal_zipf = [stick_lengths[0]/i for i in range(1,len(stick_lengths)+1)]
+  fig, ax = plt.subplots(figsize=(8,8))
+  ax.set_xscale("log", basex=2)
+  ax.set_yscale("log", basey=2)
+  ax.plot(stick_lengths, label = "stick length")
+  ax.plot(ideal_zipf, label="ideal zipfs law")
+  ax.legend(loc="upper right")
   plt.xlabel("Rank")
-  plt.ylabel("Stick Length (log2)")
-  plt.show()
+  plt.ylabel("Stick Length")
+  ax.title.set_text('Stick Length and Ideal Zipfs Plot for alpha {} and B {}'.format(alpha, B))
