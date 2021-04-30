@@ -26,8 +26,8 @@ def plot_stick_lengths(stick_lengths:np.array,
   :param sticks: list of stick lenghts
   """
   
-  stick_lengths = [stick_length**B for stick_length in stick_lengths]
-  ideal_zipf = [stick_lengths[0]/i for i in range(1,len(stick_lengths)+1)]
+  stick_lengths = [stick_length**B for stick_length in stick_lengths] #updating stick length w.r.t. B
+  ideal_zipf = [stick_lengths[0]/i for i in range(1,len(stick_lengths)+1)] #calculating zipfs ideal line
   fig, ax = plt.subplots(figsize=(8,8))
   ax.set_xscale("log", base=2)
   ax.set_yscale("log", base=2)
