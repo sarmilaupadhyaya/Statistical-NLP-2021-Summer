@@ -9,7 +9,16 @@ def preprocess(text) -> list:
 
     : return: A list of tokens
     """
-    return []
+    clean = []
+    for char in text.lower():
+        if char in string.punctuation:
+            pass
+        else:
+            clean.append(char)
+    new = "".join(clean)
+    tokens = new.split()
+
+    return tokens
 
 def find_ngram_probs(tokens, model='unigram') -> dict:
     # TODO Exercise 2.2
