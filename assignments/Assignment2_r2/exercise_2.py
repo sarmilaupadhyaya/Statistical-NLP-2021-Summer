@@ -3,6 +3,8 @@
 import string
 from collections import Counter
 from nltk import bigrams, trigrams
+import operator
+from matplotlib.pyplot import plot
 
 
 def preprocess(text) -> list:
@@ -48,7 +50,7 @@ def find_ngram_probs(tokens, model='unigram') -> dict:
         probs = {k:(v/uni_count[k[0]]) for (k,v) in bi_count.items()}
         
         
-    tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])] # also should find a nicer way to do this
+    tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])]
     tri += [tri for tri in trigrams(tokens)]
     tri_counts = Counter(tri) # count of each trigram
     
@@ -66,3 +68,7 @@ def plot_most_frequent(ngrams) -> None:
 
     You may modify the remaining function signature as per your requirements
     """
+
+    sort = dict( sorted(ngrams.items(), key=operator.itemgetter(1),reverse=True))
+    plot(list(sort.keys())[:20], list(sort.values())[:20])
+
