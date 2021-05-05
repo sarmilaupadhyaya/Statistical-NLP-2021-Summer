@@ -48,7 +48,7 @@ def find_ngram_probs(tokens, model='unigram') -> dict:
         probs = {k:(v/uni_count[k[0]]) for (k,v) in bi_count.items()}
         
         
-    tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])]
+    tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])] # also should find a nicer way to do this
     tri += [tri for tri in trigrams(tokens)]
     tri_counts = Counter(tri) # count of each trigram
     
