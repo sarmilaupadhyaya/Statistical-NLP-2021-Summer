@@ -2,6 +2,8 @@ import random
 import numpy as np
 from typing import Dict, List
 from exercise_2 import preprocess
+import matplotlib.pyplot as plt
+
 
 def ngram_generator(tokens:List, n=2):
 
@@ -86,3 +88,6 @@ def plot_pps(pps:List) -> None:
     :param pps: a list of perplexity scores
     :return:
     """
+    labels = ['unigram', 'bigram', 'trigram']
+    plt.plot(labels, pps, 'bo')
+    plt.show()
