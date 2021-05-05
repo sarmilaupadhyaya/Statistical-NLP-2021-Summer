@@ -4,7 +4,7 @@ import string
 from collections import Counter
 from nltk import bigrams, trigrams
 import operator
-from matplotlib.pyplot import plot
+import matplotlib.pyplot as plt
 
 
 def preprocess(text) -> list:
@@ -60,7 +60,7 @@ def find_ngram_probs(tokens, model='unigram') -> dict:
     return probs
 
 
-def plot_most_frequent(ngrams) -> None:
+def plot_most_frequent(ngrams, prev=None, model=None) -> None:
     # TODO Exercise 2.2
     """
     : param ngrams: The n-grams and their probabilities
@@ -69,6 +69,29 @@ def plot_most_frequent(ngrams) -> None:
     You may modify the remaining function signature as per your requirements
     """
 
-    sort = dict( sorted(ngrams.items(), key=operator.itemgetter(1),reverse=True))
-    plot(list(sort.keys())[:20], list(sort.values())[:20])
+    if model=='unigrams':
+        sort = dict(sorted(ngrams.items(), key=operator.itemgetter(1),reverse=True))
+       
+
+    else:
+	with_most_freq_uni = {el:v for (el,v) in ngrams.items() if el[:-1] == prev}    
+	sort = dict(sorted(with_most_freq_uni.items(), key=operator.itemgetter(1),reverse=True))
+
+	    
+    x_k = [str(el) for el in list(sort.keys())[:20]]
+    y_v = list(sort.values())[:20]
+    plt.plot(x_k, y_v)
+    plt.xticks(rotation=90)
+    plt.show()
+
+    if model=='unigrams':
+        return tuple([list(sort.keys())[0]])
+    else:
+        return list(sort.keys())[0]
+
+
+
+
+
+
 
