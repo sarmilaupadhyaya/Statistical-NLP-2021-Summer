@@ -2,7 +2,7 @@
 # from string import punctuation
 import string
 from collections import Counter
-from nltk import bigrams
+from nltk import bigrams, trigrams
 
 
 def preprocess(text) -> list:
