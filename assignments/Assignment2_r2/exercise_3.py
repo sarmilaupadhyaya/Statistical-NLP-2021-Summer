@@ -1,6 +1,34 @@
 import random
 import numpy as np
 from typing import Dict, List
+from exercise_2 import preprocess
+
+def ngram_generator(tokens:List, n=2):
+
+    """
+
+    """
+    if n==2:
+        return list(zip(tokens[-1:]+tokens[:-1], tokens))
+    elif n==3:
+        return list(zip(tokens[-2:]+tokens[:-2],tokens[-1:]+tokens[:-1], tokens))
+    else:
+        return []
+
+
+def Counter(items:List) -> dict:
+    """
+
+    """
+
+    items_count = dict()
+
+    for item in items:
+        if item in items_count:
+            items_count[item] += 1
+        else:
+            items_count[item] = 1
+    return items_count
 
 
 def train_test_split(corpus:List, test_size:float) -> (List, List):
@@ -24,7 +52,17 @@ def relative_frequencies(tokens:List, model='unigram') -> dict:
     :param model: the identifier of the model ('unigram, 'bigram', 'trigram')
     :return: a dictionary with the ngrams as keys and the relative frequencies as values
     """
-    return {}
+    relative_freq = dict()
+
+    if model == "bigram":
+        tokens = ngram_generator(tokens)
+    elif model == "trigram":
+        tokens = ngram_generator(tokens, n=3)
+
+    N = len(tokens)
+    freqs = Counter(tokens)
+
+    return {k:v/N for k,v in freqs.items()}
 
 
 def pp(lm:Dict, rfs:Dict) -> float:
@@ -35,7 +73,11 @@ def pp(lm:Dict, rfs:Dict) -> float:
     :param rfs: the relative frequencies
     :return: a perplexity score
     """
-    return np.NINF
+    
+    P = np.array([lm[k] for k in rfs.keys()])
+    f = np.array(list(rfs.values()))
+    pp = np.log2(P) *f
+    return 1/(2**pp.sum())
 
 
 def plot_pps(pps:List) -> None:
