@@ -15,7 +15,9 @@ def ngram_generator(tokens:List, n=2):
     else:
         return []
 
+sentence = "I really like python, it's pretty awesome.".split()
 
+print(ngram_generator(sentence, 3))
 def Counter(items:List) -> dict:
     """
 
@@ -39,8 +41,6 @@ def train_test_split(corpus:List, test_size:float) -> (List, List):
     :param test_size: the size of the training corpus
     :return: the train and test set of the corpus
     """
-    #not sure if I can shuffle the data using random package
-    random.shuffle(corpus)
     split_index = int(len(corpus) * (1-test_size))
     return corpus[:split_index], corpus[split_index:]
 
@@ -86,3 +86,4 @@ def plot_pps(pps:List) -> None:
     :param pps: a list of perplexity scores
     :return:
     """
+
