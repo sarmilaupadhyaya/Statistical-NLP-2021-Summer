@@ -1,36 +1,7 @@
 import random
 import numpy as np
 from typing import Dict, List
-from exercise_2 import preprocess
 
-def ngram_generator(tokens:List, n=2):
-
-    """
-
-    """
-    if n==2:
-        return list(zip(tokens[-1:]+tokens[:-1], tokens))
-    elif n==3:
-        return list(zip(tokens[-2:]+tokens[:-2],tokens[-1:]+tokens[:-1], tokens))
-    else:
-        return []
-
-sentence = "I really like python, it's pretty awesome.".split()
-
-print(ngram_generator(sentence, 3))
-def Counter(items:List) -> dict:
-    """
-
-    """
-
-    items_count = dict()
-
-    for item in items:
-        if item in items_count:
-            items_count[item] += 1
-        else:
-            items_count[item] = 1
-    return items_count
 
 
 def train_test_split(corpus:List, test_size:float) -> (List, List):
@@ -60,7 +31,7 @@ def relative_frequencies(tokens:List, model='unigram') -> dict:
         tokens = ngram_generator(tokens, n=3)
 
     N = len(tokens)
-    freqs = Counter(tokens)
+    freqs = custom_counter(tokens)
 
     return {k:v/N for k,v in freqs.items()}
 
@@ -76,7 +47,8 @@ def pp(lm:Dict, rfs:Dict) -> float:
     
     P = np.array([lm[k] for k in rfs.keys()])
     f = np.array(list(rfs.values()))
-    pp = np.log2(P) *f
+    pp = np.log2(P) * f
+
     return 1/(2**pp.sum())
 
 
@@ -87,3 +59,6 @@ def plot_pps(pps:List) -> None:
     :return:
     """
 
+    lables = ['unigram', 'bigram', 'trigram']
+    plt.plot(lables, pps, 'bo')
+    plt.show()
