@@ -1,10 +1,35 @@
 # Define imports
-# from string import punctuation
 import string
-from collections import Counter
-from nltk import bigrams, trigrams
 import operator
 import matplotlib.pyplot as plt
+
+
+def ngram_generator(tokens:list, n=2):
+
+    """
+
+    """
+    if n==2:
+        return list(zip(tokens[-1:]+tokens[:-1], tokens))
+    elif n==3:
+        return list(zip(tokens[-2:]+tokens[:-2],tokens[-1:]+tokens[:-1], tokens))
+    else:
+        return []
+
+
+def custom_counter(items:list) -> dict:
+    """
+
+    """
+
+    items_count = dict()
+
+    for item in items:
+        if item in items_count:
+            items_count[item] += 1
+        else:
+            items_count[item] = 1
+    return items_count
 
 
 def preprocess(text) -> list:
@@ -37,22 +62,22 @@ def find_ngram_probs(tokens, model='unigram') -> dict:
     : return: n-grams and their respective probabilities
     """
     N = len(tokens)
-    uni_count = Counter(tokens) # absolute frequency/count of each individual word (=unigram)
+    uni_count = custom_counter(tokens) # absolute frequency/count of each individual word (=unigram)
 
     if model=='unigram':
         probs = {k:(v/N) for (k,v) in uni_count.items()}
 
-    bi = [(tokens[len(tokens)-1], tokens[0])] # making sure it's circular - should probs not hardcode this like this..
-    bi += [bi for bi in bigrams(tokens)]
-    bi_count = Counter(bi) # count of each bigram
+    # bi = [(tokens[len(tokens)-1], tokens[0])] # making sure it's circular - should probs not hardcode this like this..
+    bi = [bi for bi in ngram_generator(tokens, n=2)]
+    bi_count = custom_counter(bi) # count of each bigram
 
     if model=='bigram':
         probs = {k:(v/uni_count[k[0]]) for (k,v) in bi_count.items()}
         
         
-    tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])]
-    tri += [tri for tri in trigrams(tokens)]
-    tri_counts = Counter(tri) # count of each trigram
+    # tri = [(tokens[len(tokens)-2], tokens[len(tokens)-1], tokens[0]), (tokens[len(tokens)-1], tokens[0], tokens[1])]
+    tri = [tri for tri in ngram_generator(tokens, n=3)]
+    tri_counts = custom_counter(tri) # count of each trigram
     
     if model=='trigram':  
         probs = {k:(v/bi_count[(k[0], k[1])]) for (k,v) in tri_counts.items()}
@@ -74,8 +99,8 @@ def plot_most_frequent(ngrams, prev=None, model=None) -> None:
        
 
     else:
-	with_most_freq_uni = {el:v for (el,v) in ngrams.items() if el[:-1] == prev}    
-	sort = dict(sorted(with_most_freq_uni.items(), key=operator.itemgetter(1),reverse=True))
+	    with_most_freq_uni = {el:v for (el,v) in ngrams.items() if el[:-1] == prev}    
+	    sort = dict(sorted(with_most_freq_uni.items(), key=operator.itemgetter(1),reverse=True))
 
 	    
     x_k = [str(el) for el in list(sort.keys())[:20]]
