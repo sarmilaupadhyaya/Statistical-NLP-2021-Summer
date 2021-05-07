@@ -1,6 +1,7 @@
 import random
 import numpy as np
 from typing import Dict, List
+from exercise_2 import custom_counter, ngram_generator, plt
 
 
 
