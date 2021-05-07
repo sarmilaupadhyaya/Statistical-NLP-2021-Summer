@@ -4,10 +4,13 @@ import operator
 import matplotlib.pyplot as plt
 
 
-def ngram_generator(tokens:list, n=2):
+def ngram_generator(tokens:list, n=2) -> list:
 
     """
+     : param tokens: list of strings from which you have to get word pairs.
 
+    : return: A list of tuples of ngrams
+    
     """
     if n==2:
         return list(zip(tokens[-1:]+tokens[:-1], tokens))
@@ -19,7 +22,9 @@ def ngram_generator(tokens:list, n=2):
 
 def custom_counter(items:list) -> dict:
     """
+      : param items: list of word pairs or words depending upon the model.
 
+    : return: dictionary containing the count of word pair or words.
     """
 
     items_count = dict()
@@ -33,7 +38,6 @@ def custom_counter(items:list) -> dict:
 
 
 def preprocess(text) -> list:
-    # TODO Exercise 2.2.
     """
     : param text: The text input which you must preprocess by
     removing punctuation and special characters, lowercasing,
@@ -53,7 +57,6 @@ def preprocess(text) -> list:
     return tokens
 
 def find_ngram_probs(tokens, model='unigram') -> dict:
-    # TODO Exercise 2.2
     """
     : param tokens: Pass the tokens to calculate frequencies
     param model: the identifier of the model ('unigram, 'bigram', 'trigram')
@@ -86,7 +89,6 @@ def find_ngram_probs(tokens, model='unigram') -> dict:
 
 
 def plot_most_frequent(ngrams, prev=None, model=None) -> None:
-    # TODO Exercise 2.2
     """
     : param ngrams: The n-grams and their probabilities
     Your function must find the most frequent ngrams and plot their respective probabilities
