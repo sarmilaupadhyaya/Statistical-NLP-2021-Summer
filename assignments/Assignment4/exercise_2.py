@@ -4,6 +4,27 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple
+import matplotlib.pyplot as plt
+
+
+
+
+
+def custom_counter(items:list) -> dict:
+    """
+      : param items: list of word pairs or words depending upon the model.
+
+    : return: dictionary containing the count of word pair or words.
+    """
+
+    items_count = dict()
+
+    for item in items:
+        if item in items_count:
+            items_count[item] += 1
+        else:
+            items_count[item] = 1
+    return items_count
 
 
 
@@ -79,6 +100,29 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
     :param delta: threshold for probability mass loss, defaults to 1.e-10
     :return: lists of relative frequencies and conditional probabilities
     """
+    prev_re_freqs = None
+    total_rel_freqs = []
+    total_cond_prob = []
+    for k in range(1,K+1):
+        k_grams = get_k_mers(genome_red_loc, k)
+        abs_freqs = custom_counter(k_grams)
+        N = sum(abs_freqs.values())
+        relative_freqs = {k: v/N for k, v in abs_freqs.items()}
+
+        if prev_re_freqs is None:
+            conditional_probs = relative_freqs.copy()
+        else:
+            conditional_probs = {k:(v/prev_re_freqs[tuple(k[0:(k-1)])]) for (k,v) in relative_freqs.items()} 
+        prev_re_freq = relative_freqs
+        total_rel_freqs.append(relative_freqs)
+        total_cond_prob.append(conditional_probs)
+    return total_rel_freqs, total_cond_prob
+
+
+
+
+
+
 
 
 def k_mer_statistics_24(genome_red_loc: Path, K: int, tandem_repeats=False, delta=1.e-10) -> Tuple:
@@ -111,6 +155,21 @@ def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
     :param n: the number of most frequent k-mers to plot
     :param k: the k of k-mers
     """
+    colors = ["red", "blue", "orange", "purple", "yellow"]
+    
+    for k, v in enumerate(rel_freqs):
+
+        sorted_freqs = dict(sorted(v.items(), key=lambda item: item[1], reverse=True))
+        plt.loglog(range(0, len(sorted_freqs)), sorted_freqs.values(), colors[k])
+    
+    plt.xlabel("Rank")
+    plt.ylabel("Frequency")
+    plt.show()
+
+
+
+
+
 
 
 def plot_conditional_entropies(H_ks:List[float]):
@@ -118,3 +177,4 @@ def plot_conditional_entropies(H_ks:List[float]):
 
     :param H_ks: the conditional entropy scores
     """
+
