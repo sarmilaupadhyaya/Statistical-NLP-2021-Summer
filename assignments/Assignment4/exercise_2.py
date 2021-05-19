@@ -65,14 +65,11 @@ def get_k_mers(genome_red_loc: Path, k: int) -> List[str]:
     :return: a list of n-mers
     """
 
-    nucleo = get_nucleotides(genome_red_loc)
-    # kmers = zip(list(nucleo[:-1]), list(nucleo[1:len(nucleo)]))
+    nucleo = get_nucleotides(genome_red_loc).upper()
     kmers = []
     for i in range(len(nucleo)-k+1):
         current_kmer = tuple(nucleo[i:i+k])
         kmers.append(current_kmer)
-
-
 
     return kmers
 
