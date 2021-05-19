@@ -104,6 +104,7 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
     total_rel_freqs = []
     total_cond_prob = []
     for k in range(1,K+1):
+
         k_grams = get_k_mers(genome_red_loc, k)
         abs_freqs = custom_counter(k_grams)
         N = sum(abs_freqs.values())
@@ -112,10 +113,11 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
         if prev_re_freqs is None:
             conditional_probs = relative_freqs.copy()
         else:
-            conditional_probs = {k:(v/prev_re_freqs[tuple(k[0:(k-1)])]) for (k,v) in relative_freqs.items()} 
-        prev_re_freq = relative_freqs
+            conditional_probs = {p:(v/prev_re_freqs[tuple(list(p)[0:(k-1)])]) for p,v in relative_freqs.items()} 
+        prev_re_freqs = relative_freqs
         total_rel_freqs.append(relative_freqs)
         total_cond_prob.append(conditional_probs)
+
     return total_rel_freqs, total_cond_prob
 
 
