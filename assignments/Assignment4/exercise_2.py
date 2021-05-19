@@ -6,6 +6,18 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
+
+def get_nucleotides(location):
+
+    nucleotides = ''
+    with open(location, 'r') as handle:
+        for record in SeqIO.parse(handle, "fasta"):
+            nucleotides += record.seq
+
+    return nucleotides
+
+
+
 def sample_records(genome_loc: Path, genome_red_loc: Path, num_records: int):
     """ Samples n reads from a fasta file and saves them to a new file.
 
@@ -31,6 +43,20 @@ def get_k_mers(genome_red_loc: Path, k: int) -> List[str]:
     :param k: length of of the n-mer
     :return: a list of n-mers
     """
+
+    nucleo = get_nucleotides(genome_red_loc)
+    # kmers = zip(list(nucleo[:-1]), list(nucleo[1:len(nucleo)]))
+    kmers = []
+    for i in range(len(nucleo)-k+1):
+        current_kmer = tuple(nucleo[i:i+k])
+        kmers.append(current_kmer)
+
+
+
+    return kmers
+
+
+
 
 
 def get_k_mers_24(genome_red_loc: Path, k: int, tandem_repeats=False) -> List[str]:
