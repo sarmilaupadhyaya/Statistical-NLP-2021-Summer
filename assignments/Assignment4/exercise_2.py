@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
+import math
 
 
 
@@ -146,6 +147,16 @@ def conditional_entropy(rel_freqs: Dict, cond_probs: Dict) -> float:
     :return: the conditional entropy of the corpus
     """
 
+    values = zip(rel_freqs.values(), cond_probs.values())
+    to_sum = []
+    for el in values:
+        to_sum.append(el[0] * math.log(el[1],2))
+
+
+    return -sum(to_sum)
+
+
+
 
 def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
     """ Plots n most frequent k-mers vs. their frequency.
@@ -176,4 +187,10 @@ def plot_conditional_entropies(H_ks:List[float]):
 
     :param H_ks: the conditional entropy scores
     """
+    xax = range(1,21)
+    plt.plot(xax, H_ks, 'bo')
+    plt.xticks(xax)
+    plt.xlabel("K-mer")
+    plt.ylabel("Conditional entropy")
+    plt.show()
 
