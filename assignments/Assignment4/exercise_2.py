@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import math
+import re
 
 
 
@@ -87,6 +88,19 @@ def get_k_mers_24(genome_red_loc: Path, k: int, tandem_repeats=False) -> List[st
     :param tandem_repeats: get only tandem repeats or non-tandem repeats
     :return: a list of n-mers
     """
+    nucleo = get_nucleotides(genome_red_loc)
+    kmers = []
+    if tandem_repeats:
+        nucleo = re.findall('[A-Z]', nucleo._data)
+    else:
+        nucleo = re.findall('[a-z]', nucleo._data)
+
+    for i in range(len(nucleo)-k+1):
+        current_kmer = tuple(nucleo[i:i+k])
+        kmers.append(current_kmer)
+
+    return kmers
+
 
 
 def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
@@ -107,6 +121,13 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
         abs_freqs = custom_counter(k_grams)
         N = sum(abs_freqs.values())
         relative_freqs = {k: v/N for k, v in abs_freqs.items()}
+
+        try:
+            assert abs(1 - sum(relative_freqs.values())) <= delta
+            print("K-mers relative frequency for k = " + str(k) +" has probability mass loss acceptable")
+        except:
+            print("K-mers relative frequency for k = " + str(k) +" do not have probability mass loss acceptable")
+
 
         if prev_re_freqs is None:
             conditional_probs = relative_freqs.copy()
@@ -136,6 +157,32 @@ def k_mer_statistics_24(genome_red_loc: Path, K: int, tandem_repeats=False, delt
     :param delta: threshold for probability mass loss, defaults to 1.e-10
     :return: lists of relative frequencies and conditional probabilities
     """
+    prev_re_freqs = None
+    total_rel_freqs = []
+    total_cond_prob = []
+    for k in range(1,K+1):
+
+        k_grams = get_k_mers_24(genome_red_loc, k, tandem_repeats)
+        abs_freqs = custom_counter(k_grams)
+        N = sum(abs_freqs.values())
+        relative_freqs = {k: v/N for k, v in abs_freqs.items()}
+
+        try:
+            assert abs(1 - sum(relative_freqs.values())) <= delta
+            print("K-mers relative frequency for k = " + str(k) +" has probability mass loss acceptable")
+        except:
+            print("K-mers relative frequency for k = " + str(k) +" do not have probability mass loss acceptable")
+
+        if prev_re_freqs is None:
+            conditional_probs = relative_freqs.copy()
+        else:
+            conditional_probs = {p:(v/prev_re_freqs[tuple(list(p)[0:(k-1)])]) for p,v in relative_freqs.items()}
+        prev_re_freqs = relative_freqs
+        total_rel_freqs.append(relative_freqs)
+        total_cond_prob.append(conditional_probs)
+
+    return total_rel_freqs, total_cond_prob
+
 
 
 def conditional_entropy(rel_freqs: Dict, cond_probs: Dict) -> float:
