@@ -81,8 +81,6 @@ def get_k_mers(genome_red_loc: Path, k: int, remove_seq_error: bool = False) -> 
 
 
 
-
-
 def get_k_mers_24(genome_red_loc: Path, k: int, tandem_repeats=False) -> List[str]:
     """ Samples k-mers from a fasta file (preferrably the reduced one), but this time 
         only for tandem repeat regions or non tandem repeat regions.
@@ -94,7 +92,7 @@ def get_k_mers_24(genome_red_loc: Path, k: int, tandem_repeats=False) -> List[st
     """
     nucleo = get_nucleotides(genome_red_loc)
     kmers = []
-    if tandem_repeats:
+    if not tandem_repeats:
         nucleo = re.findall('[A-Z]', nucleo._data)
     else:
         nucleo = re.findall('[a-z]', nucleo._data)
@@ -143,9 +141,6 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10, remove_seq_erro
         total_cond_prob.append(conditional_probs)
 
     return total_rel_freqs, total_cond_prob
-
-
-
 
 
 
@@ -210,12 +205,13 @@ def conditional_entropy(rel_freqs: Dict, cond_probs: Dict) -> float:
 
 
 
-def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
+def plot_k_mers(rel_freqs: List[Dict], n=10, k=5, title=""):
     """ Plots n most frequent k-mers vs. their frequency.
 
     :param rel_freqs: the list of relative frequency dicts
     :param n: the number of most frequent k-mers to plot
     :param k: the k of k-mers
+    :params title: title for the plot
     """
     colors = ["red", "blue", "orange", "purple", "yellow"]
     
@@ -226,6 +222,7 @@ def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
     
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
+    plt.title(title)
     plt.figure(figsize=(10, 10), dpi=80)
     plt.show()
 
@@ -235,13 +232,15 @@ def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
 
 
 
-def plot_conditional_entropies(H_ks:List[float]):
+def plot_conditional_entropies(H_ks:List[float], title):
     """ Plots conditional entropy vs. k-mer length
 
     :param H_ks: the conditional entropy scores
+    :params title: title for the plot
     """
     xax = range(1,21)
     plt.plot(xax, H_ks, 'bo')
+    plt.title(title)
     plt.xticks(xax)
     plt.xlabel("K-mer")
     plt.ylabel("Conditional entropy")
