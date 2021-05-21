@@ -59,15 +59,19 @@ def sample_records(genome_loc: Path, genome_red_loc: Path, num_records: int):
         SeqIO.write(sequence[index], handle, 'fasta')
     
 
-def get_k_mers(genome_red_loc: Path, k: int) -> List[str]:
+def get_k_mers(genome_red_loc: Path, k: int, remove_seq_error: bool = False) -> List[str]:
     """ Samples k-mers from a fasta file (preferrably the reduced one).
         See also https://en.wikipedia.org/wiki/K-mer
     :param genome_loc: path to the fasta file
     :param k: length of of the n-mer
+    :param remove_seq_error: bool value to remove the error "N" or not.
     :return: a list of n-mers
     """
 
     nucleo = get_nucleotides(genome_red_loc).upper()
+
+    if remove_seq_error:
+        nucleo = nucleo._data.replace("N", "")
     kmers = []
     for i in range(len(nucleo)-k+1):
         current_kmer = tuple(nucleo[i:i+k])
@@ -103,13 +107,14 @@ def get_k_mers_24(genome_red_loc: Path, k: int, tandem_repeats=False) -> List[st
 
 
 
-def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
+def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10, remove_seq_error = False) -> Tuple:
     """ Calculates relative k-mer frequencies and conditional k-mer probabilities 
         on the provided fasta file.
 
     :param genome_red_loc: path to the fasta file
     :param K: upper bound of the k of k-mers
-    :param delta: threshold for probability mass loss, defaults to 1.e-10
+    :param delta: threshold for probability mass loss, defaults to 2.e-10
+    :param remove_seq_error: bool value to remove the error "N" or not.
     :return: lists of relative frequencies and conditional probabilities
     """
     prev_re_freqs = None
@@ -117,7 +122,7 @@ def k_mer_statistics(genome_red_loc: Path, K: int, delta=1.e-10) -> Tuple:
     total_cond_prob = []
     for k in range(1,K+1):
 
-        k_grams = get_k_mers(genome_red_loc, k)
+        k_grams = get_k_mers(genome_red_loc, k, remove_seq_error)
         abs_freqs = custom_counter(k_grams)
         N = sum(abs_freqs.values())
         relative_freqs = {k: v/N for k, v in abs_freqs.items()}
@@ -217,10 +222,11 @@ def plot_k_mers(rel_freqs: List[Dict], n=10, k=5):
     for k, v in enumerate(rel_freqs):
 
         sorted_freqs = dict(sorted(v.items(), key=lambda item: item[1], reverse=True))
-        plt.loglog(range(0, len(sorted_freqs)), sorted_freqs.values(), colors[k])
+        plt.loglog(range(0, len(sorted_freqs)), sorted_freqs.values(),'o', colors[k])
     
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
+    plt.figure(figsize=(10, 10), dpi=80)
     plt.show()
 
 
