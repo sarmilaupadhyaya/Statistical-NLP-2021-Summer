@@ -22,9 +22,9 @@ def preprocess(text) -> List:
 
 def train_test_split_data(text:List, test_size:float=0.1):
 
-    train_split = int(len(text) * test_size)
-    train = text[:train_split]
-    test = text[train_split:]
+    test_split = int(len(text) * test_size)
+    train = text[:(len(text)-test_split)]
+    test = text[(len(text)-test_split):]
 
 
     return train, test
