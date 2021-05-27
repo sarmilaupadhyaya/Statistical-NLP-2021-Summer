@@ -124,13 +124,12 @@ class LanguageModel:
                 tri_count_test = [tri for tri in ngram_generator(self.train_tokens, n=3)]
                 tri_unsmoothened_count = update_vocab(tri_count_train, tri_count_test)
 
-                if model==3:
-                    tri_smoothened_count = lidstone_smoothing(tri_unsmoothened_count)
+                tri_smoothened_count = lidstone_smoothing(tri_unsmoothened_count)
 
-                    probs = dict()
-                    for pair,value in tri_smoothened_count.items():
-                        v = [1 for k,v in tri_smoothened_count.items() if (k[0] == pair[0] and k[1] == pair[1])]
-                        probs[pair] = value/(self.alpha*v + bi_unsmoothened_count[(pair[0],pait[1])])
+                probs = dict()
+                for pair,value in tri_smoothened_count.items():
+                    v = [1 for k,v in tri_smoothened_count.items() if (k[0] == pair[0] and k[1] == pair[1])]
+                    probs[pair] = value/(self.alpha*v + bi_unsmoothened_count[(pair[0],pait[1])])
 
         return probs
 
