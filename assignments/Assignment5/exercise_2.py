@@ -6,6 +6,11 @@ def plot_pp(pps: Dict):
     :param pps: dictionary with langs as keys and lists of perplexity scores as values
     """
 
+    lables = ['unigram', 'bigram', 'trigram']
+    plt.plot(lables, pps, 'bo')
+    plt.show()
+
+
 
 def plot_pp_vs_alpha(pps: List[float], alphas: List[float]):
     """ Plots n-gram perplexity vs alpha
