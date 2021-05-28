@@ -2,7 +2,6 @@ from collections import Counter
 from copy import deepcopy
 import numpy as np
 from typing import List
-from utils import relative_frequencies, find_ngram_probs
 
 
 def ngram_generator(tokens:list, n=2) -> list:
@@ -38,7 +37,7 @@ def custom_counter(items:list) -> dict:
     return items_count
 
 
-def relative_frequencies(tokens:List, model=1) -> dict:
+def relative_frequencies(tokens:List, model:int=1) -> dict:
     """
     Should compute the relative n-gram frequencies of the test set of the corpus.
     :param tokens: the tokenized test set
@@ -82,9 +81,13 @@ class LanguageModel:
         self.lm = self.find_ngram_probs()
 
 
-    def update_vocab(self,train_counts, test_counts):
+    def update_vocab(self,train_counts, test_counts) -> dict:
         """
-
+        function that adds unseen test word in the test corpus as count 0
+        :param train_counts: dictionary containing ngram pair as key and its count as value for train corpus.
+        :param test_counts: dictionary containing ngram pair as key and its count as value for test corpus.
+        
+        : return updated dictionary adding the unseen test ngrams.
         """
 
         for k,v in test_counts.items():
@@ -94,18 +97,13 @@ class LanguageModel:
         return train_counts
 
     
-    def find_ngram_probs(self) -> dict:
+    def find_ngram_probs(self) -> list:
         """
-        : param tokens: Pass the tokens to calculate frequencies
-        param model: the identifier of the model (1,2,3)
-        You may modify the remaining function signature as per your requirements
 
         : return: n-grams and their respective probabilities
         """
         probs = []
         for i in range(1, self.N+1):
-            import datetime
-            a = datetime.datetime.now()
             ngrams_train = [bi for bi in ngram_generator(self.train_tokens, n=i)]
             ngrams_test = [bi for bi in ngram_generator(self.test_tokens, n=i)]
             count_train = custom_counter(ngrams_train)
@@ -113,14 +111,16 @@ class LanguageModel:
             unsmoothened_count = self.update_vocab(count_train, count_test)
             smoothened_count = self.lidstone_smoothing(unsmoothened_count)
             if i==1:
+
                 N = sum(list(unsmoothened_count.values()))
-                smoothened_N = sum(list(smoothened_count.values())) * self.alpha + N
-                probs.append({k:smoothened_count[k]/smoothened_N for k in ngrams_test})
+                smoothened_N = sum(list(smoothened_count.values()))
+                probs.append({k:smoothened_count[k]/smoothened_N for k,v in unsmoothened_count.items()})
                 previous_unsmoothened_count = unsmoothened_count.copy()
+
             elif i<=3:
                 temp_probs = dict()
                 v_prev = dict()
-                for k, v in smoothened_count.items():
+                for k, v in count_test.items():
                     if tuple(list(k)[:-1]) in v_prev:
                         v_prev[tuple(list(k)[:-1])] += v
                     else:
@@ -141,8 +141,9 @@ class LanguageModel:
         return probs
 
     
-    def perplexity(self):
+    def perplexity(self) -> list:
         """ returns the perplexity of the language model for n-grams with n=n """
+
         pps = []
         for lm,ref in zip(self.lm, self.test_rfs):
             P = np.array([lm[k] for k in list(ref.keys())])
@@ -152,7 +153,7 @@ class LanguageModel:
         return pps
 
 
-    def lidstone_smoothing(self, unsmoothened_count: dict):
+    def lidstone_smoothing(self, unsmoothened_count: dict) -> dict:
         """ applies lidstone smoothing on train counts
 
         :param unsmoothened_count: the unsmoothed counts
@@ -160,7 +161,6 @@ class LanguageModel:
         """
 
         return {key: (value + self.alpha) for key,value in unsmoothened_count.items()}
-
 
 
 
