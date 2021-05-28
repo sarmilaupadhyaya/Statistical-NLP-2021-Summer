@@ -18,7 +18,7 @@ def ngram_generator(tokens:list, n=2) -> list:
     elif n==3:
         return list(zip(tokens[-2:]+tokens[:-2],tokens[-1:]+tokens[:-1], tokens))
     else:
-        return []
+        return tokens
 
 
 def custom_counter(items:list) -> dict:
@@ -45,17 +45,22 @@ def relative_frequencies(tokens:List, model=1) -> dict:
     :param model: the identifier of the model ('unigram, 'bigram', 'trigram')
     :return: a dictionary with the ngrams as keys and the relative frequencies as values
     """
-    relative_freq = dict()
+    relative_freqs= []
 
-    if model == 2:
-        tokens = ngram_generator(tokens)
-    elif model == 3:
-        tokens = ngram_generator(tokens, n=3)
+    for i in range(1, model+1):
+        relative_freq = dict()
+        if i ==1:
+            ngram_tokens = tokens.copy()
+        elif i == 2:
+            ngram_tokens = ngram_generator(tokens)
+        elif i == 3:
+            ngram_tokens = ngram_generator(tokens, n=3)
 
-    N = len(tokens)
-    freqs = custom_counter(tokens)
+        N = len(ngram_tokens)
+        freqs = custom_counter(ngram_tokens)
 
-    return {k:v/N for k,v in freqs.items()}
+        relative_freqs.append({k:v/N for k,v in freqs.items()})
+    return relative_freqs
 
 
 
@@ -73,18 +78,19 @@ class LanguageModel:
         self.alpha = alpha
         self.train_tokens = train_tokens
         self.test_tokens = test_tokens
-        self.test_rfs = relative_frequencies(test_tokens)
+        self.test_rfs = relative_frequencies(test_tokens, N)
         self.lm = self.find_ngram_probs()
 
 
-    def update_vocab(self,train_ngrams, test_counts):
+    def update_vocab(self,train_counts, test_counts):
         """
 
         """
 
-        for test_count in test_counts:
-            if test_count not in train_counts:
-                self.train_counts[test_count] = 0
+        for k,v in test_counts.items():
+            if k not in train_counts:
+                train_counts[k] = 0
+                
         return train_counts
 
     
@@ -96,51 +102,54 @@ class LanguageModel:
 
         : return: n-grams and their respective probabilities
         """
+        probs = []
+        for i in range(1, self.N+1):
+            import datetime
+            a = datetime.datetime.now()
+            ngrams_train = [bi for bi in ngram_generator(self.train_tokens, n=i)]
+            ngrams_test = [bi for bi in ngram_generator(self.test_tokens, n=i)]
+            count_train = custom_counter(ngrams_train)
+            count_test = custom_counter(ngrams_test)
+            unsmoothened_count = self.update_vocab(count_train, count_test)
+            smoothened_count = self.lidstone_smoothing(unsmoothened_count)
+            if i==1:
+                N = sum(list(unsmoothened_count.values()))
+                smoothened_N = sum(list(smoothened_count.values())) * self.alpha + N
+                probs.append({k:smoothened_count[k]/smoothened_N for k in ngrams_test})
+                previous_unsmoothened_count = unsmoothened_count.copy()
+            elif i<=3:
+                temp_probs = dict()
+                v_prev = dict()
+                for k, v in smoothened_count.items():
+                    if tuple(list(k)[:-1]) in v_prev:
+                        v_prev[tuple(list(k)[:-1])] += v
+                    else:
+                        v_prev[tuple(list(k)[:-1])] = v
 
-        uni_count_train = custom_counter(self.train_tokens) # absolute frequency/count of each individual word (=unigram)
-        uni_count_test = custom_counter(self.test_tokens)
-        uni_unsmoothened_count = update_vocab(uni_count_train, uni_count_test)
+                for pair in ngrams_test:
+                    if i == 2:
+                        set_prev = pair[0]
+                    else:
+                        set_prev = tuple(list(pair)[:-1])
+                    #v = sum([v for k,v in smoothened_count.items() if list(k)[:-1] == list(pair)[:-1]])
+                    temp_probs[pair] = smoothened_count[pair]/(self.alpha*v_prev[tuple(list(pair)[:-1])] + previous_unsmoothened_count[set_prev])
 
-        if self.N==1:
-            uni_smoothened_count = lidstone_smoothing(uni_unsmoothened_count) 
-            N = sum(list(uni_unsmoothened_count.values()))
-            uni_smoothened_N = sum(list(uni_smoothened_count.values())) * self.alpha + N
-            probs = {k:v/uni_smoothened_N for k,v in uni_smoothened_N.items()}
-        else:
-            bi_count_train = [bi for bi in ngram_generator(self.train_tokens, n=2)]
-            bi_count_test = [bi for bi in ngram_generator(self.train_tokens, n=2)]
-            bi_unsmoothened_count = update_vocab(bi_count_train, bi_count_test)
-
-            if self.N==2:
-                bi_smoothened_count = lidstone_smoothing(bi_unsmoothened_count)
-
-                probs = dict()
-                for pair,value in bi_smoothened_count.items():
-                    v = [1 for k,v in bi_smoothened_count.items() if k[0] == pair[0]]
-                    probs[pair] = value/(self.alpha*v + uni_unsmoothened_count[pair[0]])
- 
-            elif self.N == 3:
-                tri_count_train = [tri for tri in ngram_generator(self.train_tokens, n=3)]
-                tri_count_test = [tri for tri in ngram_generator(self.train_tokens, n=3)]
-                tri_unsmoothened_count = update_vocab(tri_count_train, tri_count_test)
-
-                tri_smoothened_count = lidstone_smoothing(tri_unsmoothened_count)
-
-                probs = dict()
-                for pair,value in tri_smoothened_count.items():
-                    v = [1 for k,v in tri_smoothened_count.items() if (k[0] == pair[0] and k[1] == pair[1])]
-                    probs[pair] = value/(self.alpha*v + bi_unsmoothened_count[(pair[0],pait[1])])
-
+                previous_unsmoothened_count = unsmoothened_count.copy()
+                probs.append(temp_probs)
+            else:
+                pass
         return probs
 
     
-    def perplexity(self, n: int):
+    def perplexity(self):
         """ returns the perplexity of the language model for n-grams with n=n """
-
-        P = np.array([self.lm[k] for k in self.test_rfs.keys()])
-        f = np.array(list(self.test_rfs.values()))
-        pp = np.log2(P) * f
-        return pp
+        pps = []
+        for lm,ref in zip(self.lm, self.test_rfs):
+            P = np.array([lm[k] for k in list(ref.keys())])
+            f = np.array(list(ref.values()))
+            pp = np.log2(P) * f
+            pps.append(1/(2**pp.sum()))
+        return pps
 
 
     def lidstone_smoothing(self, unsmoothened_count: dict):
@@ -152,4 +161,6 @@ class LanguageModel:
 
         return {key: (value + self.alpha) for key,value in unsmoothened_count.items()}
 
-        
+
+
+
