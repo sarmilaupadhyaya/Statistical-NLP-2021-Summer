@@ -110,34 +110,25 @@ class LanguageModel:
             count_test = custom_counter(ngrams_test)
             unsmoothened_count = self.update_vocab(count_train, count_test)
             smoothened_count = self.lidstone_smoothing(unsmoothened_count)
-            if i==1:
 
+            if i==1:
                 N = sum(list(unsmoothened_count.values()))
                 smoothened_N = sum(list(smoothened_count.values()))
                 probs.append({k:smoothened_count[k]/smoothened_N for k,v in unsmoothened_count.items()})
                 previous_unsmoothened_count = unsmoothened_count.copy()
-
-            elif i<=3:
+                v_prev = len(smoothened_count)
+            else:
                 temp_probs = dict()
-                v_prev = dict()
-                for k, v in count_test.items():
-                    if tuple(list(k)[:-1]) in v_prev:
-                        v_prev[tuple(list(k)[:-1])] += v
-                    else:
-                        v_prev[tuple(list(k)[:-1])] = v
-
+                
                 for pair in ngrams_test:
                     if i == 2:
                         set_prev = pair[0]
                     else:
                         set_prev = tuple(list(pair)[:-1])
-                    #v = sum([v for k,v in smoothened_count.items() if list(k)[:-1] == list(pair)[:-1]])
-                    temp_probs[pair] = smoothened_count[pair]/(self.alpha*v_prev[tuple(list(pair)[:-1])] + previous_unsmoothened_count[set_prev])
+                    temp_probs[pair] = smoothened_count[pair]/(self.alpha*v_prev + previous_unsmoothened_count[set_prev])
 
                 previous_unsmoothened_count = unsmoothened_count.copy()
                 probs.append(temp_probs)
-            else:
-                pass
         return probs
 
     
@@ -161,6 +152,13 @@ class LanguageModel:
         """
 
         return {key: (value + self.alpha) for key,value in unsmoothened_count.items()}
+if __name__ == "__main__":
+    train_tokens = ["I", "am", "a", "man", "not", "a", "mouse", "and", "also", "not", "a", "dog"]
+    test_tokens = ["I", "am", "a", "cow", "not", "a", "horse"]
+
+    LM = LanguageModel(train_tokens, test_tokens, N=3, alpha=1)
+    pp = LM.perplexity()
+    print(pp)
 
 
 
