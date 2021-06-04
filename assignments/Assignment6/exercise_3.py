@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from typing import List
+import string
 
 
 def train_test_split_data(text: List[str], test_size=0.2):
@@ -33,6 +34,7 @@ def k_validation_folds(text: List[str], k_folds=10):
 
     return results
 
+
 def plot_pp_vs_alpha(pps: List[float], alphas: List[float]):
     """ Plots n-gram perplexity vs alpha
     :param pps: list of perplexity scores
@@ -48,20 +50,17 @@ def plot_pp_vs_alpha(pps: List[float], alphas: List[float]):
 
 
 def preprocess(text) -> List:
-
+    """
+    preprocess
+    """
     clean = []
-
     # remove punctuation
-
     for char in text.lower():
         if char.isalnum() == True or char.isspace():
             clean.append(char)
         else:
             pass
     new = "".join(clean)
-
     tokens = new.split()
-
     return tokens
-
 
