@@ -5,7 +5,7 @@ import math
 class CountTree():
   def __init__(self, n=4):
 
-      self.ngrams = dict()
+      self.ngrams = defaultdict()
   
 
 
@@ -72,7 +72,7 @@ class CountTree():
 
 
       for kk,v in self.ngrams.items():
-          if v<=4:
+          if v<=k:
               pruned = None
               for i in range(1, len(kk)):
                   each = kk[-i:]
