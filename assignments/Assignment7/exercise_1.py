@@ -33,6 +33,10 @@ class CountTree():
 
   def perplexity(self, ngrams, vocab):
       """
+      params:
+      ngrams (list) :
+      vocab (set) : 
+      returns: perplexity value as float
       """
      
       V = len(vocab)
@@ -60,17 +64,11 @@ class CountTree():
      
 
   def prune(self, k):
+      """
+      params: k (int): pruning threshold.
+      returns: None 
 
-      #subtree_pruned= {kk:vv for kk,vv in self.ngrams.items() if vv<=k}
-      #subtree_pruned = sorted(subtree_pruned, key=len)
-      #copy_subtree_pruned = subtree_pruned.copy()
-      #for each in subtree_pruned:
-      #    if each in copy_subtree_pruned:
-      #        copy_subtree_pruned.remove(each)
-      #        subtrees = [kk for kk in copy_subtree_pruned if kk[-len(each):] == each]
-      #        for subtree in subtrees:
-      #            copy_subtree_pruned.remove(subtree)
-      #            self.ngrams[subtree] = self.ngrams[each]
+      """
 
 
       for kk,v in self.ngrams.items():
@@ -84,10 +82,6 @@ class CountTree():
                           pruned = self.get(each)
                   else:
                       self.ngrams[each] = pruned 
-
-      #for kk,v in self.ngrams.items():
-      #    if v<=k:
-      #        self.ngrams = {ngram:v if ngram[-len(kk):] == kk else count for ngram,count in self.ngrams.items()}
 
       
       
